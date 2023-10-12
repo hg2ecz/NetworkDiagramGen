@@ -1,0 +1,285 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[magyar]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[nomath]{lmodern}
+\usepackage[hmargin=2cm]{geometry}
+\usepackage{caption}
+\usepackage{pdflscape}
+\usepackage{tikz}
+\tikzset{every picture/.style={/utils/exec={\sffamily}}}
+%\usetikzlibrary{calc, shadings, shadows, shapes.arrows, shapes.symbols}
+\usetikzlibrary{backgrounds,calc,shadings,shapes.arrows,shapes.symbols,shadows}
+
+% =============================================================
+% Csomo definicio van itt, ez ne riasszon el, ez fix definicio.
+% A lenyeg a legaljan van, ahol felhasznaljuk
+% =============================================================
+
+\definecolor{myblue}{rgb}{0.5, 0.5, 1}
+\definecolor{mymagenta}{rgb}{1, 0, 1}
+
+\makeatletter
+\pgfkeys{/pgf/.cd,
+  parallelepiped offset x/.initial=2mm,
+  parallelepiped offset y/.initial=2mm
+}
+\pgfdeclareshape{parallelepiped}
+{
+  \inheritsavedanchors[from=rectangle] % this is nearly a rectangle
+  \inheritanchorborder[from=rectangle]
+  \inheritanchor[from=rectangle]{north}
+  \inheritanchor[from=rectangle]{north west}
+  \inheritanchor[from=rectangle]{north east}
+  \inheritanchor[from=rectangle]{center}
+  \inheritanchor[from=rectangle]{west}
+  \inheritanchor[from=rectangle]{east}
+  \inheritanchor[from=rectangle]{mid}
+  \inheritanchor[from=rectangle]{mid west}
+  \inheritanchor[from=rectangle]{mid east}
+  \inheritanchor[from=rectangle]{base}
+  \inheritanchor[from=rectangle]{base west}
+  \inheritanchor[from=rectangle]{base east}
+  \inheritanchor[from=rectangle]{south}
+  \inheritanchor[from=rectangle]{south west}
+  \inheritanchor[from=rectangle]{south east}
+  \backgroundpath{
+    % store lower right in xa/ya and upper right in xb/yb
+    \southwest \pgf@xa=\pgf@x \pgf@ya=\pgf@y
+    \northeast \pgf@xb=\pgf@x \pgf@yb=\pgf@y
+    \pgfmathsetlength\pgfutil@tempdima{\pgfkeysvalueof{/pgf/parallelepiped
+      offset x}}
+    \pgfmathsetlength\pgfutil@tempdimb{\pgfkeysvalueof{/pgf/parallelepiped
+      offset y}}
+    \def\ppd@offset{\pgfpoint{\pgfutil@tempdima}{\pgfutil@tempdimb}}
+    \pgfpathmoveto{\pgfqpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xb}{\pgf@yb}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathclose
+    \pgfpathmoveto{\pgfqpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xb}{\pgf@ya}}{\ppd@offset}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xb}{\pgf@yb}}{\ppd@offset}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xa}{\pgf@yb}}{\ppd@offset}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathmoveto{\pgfqpoint{\pgf@xb}{\pgf@yb}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xb}{\pgf@yb}}{\ppd@offset}}
+  }
+}
+\makeatother
+
+\tikzset{l3 switch/.style={
+    parallelepiped,fill=switch, draw=white,
+    minimum width=0.75cm,
+    minimum height=0.75cm,
+    parallelepiped offset x=1.75mm,
+    parallelepiped offset y=1.25mm,
+    path picture={
+      \node[fill=white,
+        circle,
+        minimum size=6pt,
+        inner sep=0pt,
+        append after command={
+          \pgfextra{
+            \foreach \angle in {0,45,...,360}
+            \draw[-latex,fill=white] (\tikzlastnode.\angle)--++(\angle:2.25mm);
+          }
+        }
+      ] 
+       at ([xshift=-0.75mm,yshift=-0.5mm]path picture bounding box.center){};
+    }
+  },
+  ports/.style={
+    line width=0.3pt,
+    top color=gray!20,
+    bottom color=gray!80
+  },
+  rack switch/.style={
+    parallelepiped,fill=white, draw,
+    minimum width=1.25cm,
+    minimum height=0.25cm,
+    parallelepiped offset x=2mm,
+    parallelepiped offset y=1.25mm,
+    xscale=-1,
+    path picture={
+      \draw[top color=gray!5,bottom color=gray!40] (path picture bounding box.south west) rectangle (path picture bounding box.north east);
+      \coordinate (A-west) at ([xshift=-0.2cm]path picture bounding box.west);
+      \coordinate (A-center) at ($(path picture bounding box.center)!0!(path picture bounding box.south)$);
+      \foreach \x in {0.275,0.525,0.775}{
+        \draw[ports]([yshift=-0.05cm]$(A-west)!\x!(A-center)$) rectangle +(0.1,0.05);
+        \draw[ports]([yshift=-0.125cm]$(A-west)!\x!(A-center)$) rectangle +(0.1,0.05);
+      }
+      \coordinate (A-east) at (path picture bounding box.east);
+      \foreach \x in {0.085,0.21,0.335,0.455,0.635,0.755,0.875,1}{
+        \draw[ports]([yshift=-0.1125cm]$(A-east)!\x!(A-center)$) rectangle +(0.05,0.1);
+      }
+    }
+  },
+  server/.style={
+    parallelepiped,
+    fill=white, draw,
+    minimum width=0.35cm,
+    minimum height=0.75cm,
+    parallelepiped offset x=3mm,
+    parallelepiped offset y=2mm,
+    xscale=-1,
+    path picture={
+      \draw[top color=myblue!80,bottom color=myblue!40] (path picture bounding box.south west) rectangle (path picture bounding box.north east);
+      \coordinate (A-center) at ($(path picture bounding box.center)!0!(path picture bounding box.south)$);
+      \coordinate (A-west) at ([xshift=-0.575cm]path picture bounding box.west);
+      \draw[ports]([yshift=0.1cm]$(A-west)!0!(A-center)$) rectangle +(0.2,0.065);
+      \draw[ports]([yshift=0.01cm]$(A-west)!0.085!(A-center)$) rectangle +(0.15,0.05);
+      \fill[black]([yshift=-0.35cm]$(A-west)!-0.1!(A-center)$) rectangle +(0.235,0.0175);
+      \fill[black]([yshift=-0.385cm]$(A-west)!-0.1!(A-center)$) rectangle +(0.235,0.0175);
+      \fill[black]([yshift=-0.42cm]$(A-west)!-0.1!(A-center)$) rectangle +(0.235,0.0175);
+    }  
+  },
+  serverhidden/.style={
+    parallelepiped,
+    fill=white, draw,
+    minimum width=0.35cm,
+    minimum height=0.75cm,
+    parallelepiped offset x=3mm,
+    parallelepiped offset y=2mm,
+    xscale=-1,
+    path picture={
+      \draw[top color=lightgray!5,bottom color=lightgray!20] (path picture bounding box.south west) rectangle (path picture bounding box.north east);
+      \coordinate (A-center) at ($(path picture bounding box.center)!0!(path picture bounding box.south)$);
+      \coordinate (A-west) at ([xshift=-0.575cm]path picture bounding box.west);
+      \draw[ports]([yshift=0.1cm]$(A-west)!0!(A-center)$) rectangle +(0.2,0.065);
+      \draw[ports]([yshift=0.01cm]$(A-west)!0.085!(A-center)$) rectangle +(0.15,0.05);
+      \fill[lightgray]([yshift=-0.35cm]$(A-west)!-0.1!(A-center)$) rectangle +(0.235,0.0175);
+      \fill[lightgray]([yshift=-0.385cm]$(A-west)!-0.1!(A-center)$) rectangle +(0.235,0.0175);
+      \fill[lightgray]([yshift=-0.42cm]$(A-west)!-0.1!(A-center)$) rectangle +(0.235,0.0175);
+    }  
+  },
+}
+
+
+% Styles for interfaces and edge labels
+\tikzset{%
+  interface/.style={draw, rectangle, rounded corners, font=\LARGE\sffamily},
+  ethernet/.style={interface, fill=yellow!50},% ethernet interface
+  mgmtether/.style={interface, fill=black!50},% mgmtether interface
+  vlan/.style={interface, fill=red!50},% vlan interface
+  vpn/.style={interface, fill=red!50},% vpn interface
+  serial/.style={interface, fill=green!70},% serial interface
+  speed/.style={sloped, anchor=south, font=\large\sffamily},% line speed at edge
+  internal_arrow/.style={draw, shape=single arrow, single arrow head extend=4mm,
+    minimum height=1.7cm, minimum width=3mm, white, fill=myblue!20,
+    drop shadow={opacity=.8, fill=myblue!50!black}, font=\tiny}% inroute / outroute arrows
+}
+
+% The router icon
+\newcommand*{\router}[2]{
+ \begin{tikzpicture}
+  \coordinate (ll) at (-3,0);
+  \coordinate (lr) at (3,0);
+  \coordinate (ul) at (-3,2);
+  \coordinate (ur) at (3,2);
+  \shade [shading angle=90, left color=black!40!myblue, right color=white] (ll) arc (-180:-60:3cm and .75cm) -- +(0,2) arc (-60:-180:3cm and .75cm) -- cycle;
+  \shade [shading angle=270, right color=black!40!myblue, left color=white!50] (lr) arc (0:-60:3cm and .75cm) -- +(0,2) arc (-60:0:3cm and .75cm) -- cycle;
+  \draw [thick] (ll) arc (-180:0:3cm and .75cm) -- (ur) arc (0:-180:3cm and .75cm) -- cycle;
+  \draw [thick, shade, upper left=myblue!30!black, lower left=myblue!80!white, upper right=myblue!80!white, lower right=white] (ul) arc (-180:180:3cm and .75cm);
+  \node at (0,0.7){\color{blue!70!black}\huge #1};% The name of the router
+  \node at (0,-0.1){\color{blue!70!black}\huge #2};% The IP address of the router
+  % The four arrows, symbols for incoming and outgoing routes:
+  \newcommand*{\shift}{1.3cm}% For placing the arrows later
+  \begin{scope}[yshift=2cm, yscale=0.28, transform shape]
+    \node[internal_arrow, rotate=45, xshift=\shift] {\strut};
+    \node[internal_arrow, rotate=-45, xshift=-\shift] {\strut};
+    \node[internal_arrow, rotate=-135, xshift=\shift] {\strut};
+    \node[internal_arrow, rotate=135, xshift=-\shift] {\strut};
+  \end{scope}
+ \end{tikzpicture}
+}
+
+\newcommand*{\routerhidden}[2]{
+ \begin{tikzpicture}
+  \coordinate (ll) at (-3,0);
+  \coordinate (lr) at (3,0);
+  \coordinate (ul) at (-3,2);
+  \coordinate (ur) at (3,2);
+  \shade [shading angle=90, left color=gray!40!lightgray, right color=white] (ll) arc (-180:-60:3cm and .75cm) -- +(0,2) arc (-60:-180:3cm and .75cm) -- cycle;
+  \shade [shading angle=270, right color=gray!40!lightgray, left color=white!50] (lr) arc (0:-60:3cm and .75cm) -- +(0,2) arc (-60:0:3cm and .75cm) -- cycle;
+  \draw [thick] (ll) arc (-180:0:3cm and .75cm) -- (ur) arc (0:-180:3cm and .75cm) -- cycle;
+  \draw [thick, shade, upper left=lightgray!30!gray, lower left=lightgray!80!white, upper right=lightgray!80!white, lower right=white] (ul) arc (-180:180:3cm and .75cm);
+  \node at (0,0.7){\color{lightgray!70!gray}\huge #1};% The name of the router
+  \node at (0,-0.1){\color{lightgray!70!gray}\huge #2};% The IP address of the router
+  % The four arrows, symbols for incoming and outgoing routes:
+  \newcommand*{\shift}{1.3cm}% For placing the arrows later
+  \begin{scope}[yshift=2cm, yscale=0.28, transform shape]
+    \node[internal_arrow, rotate=45, xshift=\shift] {\strut};
+    \node[internal_arrow, rotate=-45, xshift=-\shift] {\strut};
+    \node[internal_arrow, rotate=-135, xshift=\shift] {\strut};
+    \node[internal_arrow, rotate=135, xshift=-\shift] {\strut};
+  \end{scope}
+ \end{tikzpicture}
+}
+
+
+% The switch icon
+\newcommand*{\switch}[2]{
+ \begin{tikzpicture}
+  \coordinate (ll) at (-3, 0.5);
+  \draw [thick, shade, upper left=myblue!30!black, lower left=myblue!80!white, upper right=myblue!80!white, lower right=white] (ll) rectangle (5, 3.4);
+  \node at (0.5, 1.8){\color{blue!70!black}\huge #1};% The name of the switch
+  \node at (0.5, 1.0){\color{blue!70!black}\huge #2};% The IP address of the switch
+  \begin{scope}[yshift=2cm, yscale=0.28, transform shape]
+    \node[internal_arrow, rotate=0, xshift=2cm, yshift=4.2cm] {\strut};
+    \node[internal_arrow, rotate=0, xshift=2cm, yshift=2.2cm] {\strut};
+    \node[internal_arrow, rotate=180, xshift=0cm, yshift=-3.2cm] {\strut};
+    \node[internal_arrow, rotate=180, xshift=0cm, yshift=-1.2cm] {\strut};
+  \end{scope}
+ \end{tikzpicture}
+}
+
+\newcommand*{\switchhidden}[2]{
+ \begin{tikzpicture}
+  \coordinate (ll) at (-3, 0.5);
+  \draw [thick, shade, upper left=gray!30!lightgray, lower left=lightgray!80!white, upper right=lightgray!80!white, lower right=white] (ll) rectangle (5, 3.4);
+  \node at (0.5, 1.8){\color{gray!70!lightgray}\huge #1};% The name of the switch
+  \node at (0.5, 1.0){\color{gray!70!lightgray}\huge #2};% The IP address of the switch
+  \begin{scope}[yshift=2cm, yscale=0.28, transform shape]
+    \node[internal_arrow, rotate=0, xshift=2cm, yshift=4.2cm] {\strut};
+    \node[internal_arrow, rotate=0, xshift=2cm, yshift=2.2cm] {\strut};
+    \node[internal_arrow, rotate=180, xshift=0cm, yshift=-3.2cm] {\strut};
+    \node[internal_arrow, rotate=180, xshift=0cm, yshift=-1.2cm] {\strut};
+  \end{scope}
+ \end{tikzpicture}
+}
+
+% The server icon
+\newcommand*{\server}[2] {
+  \begin{tikzpicture}
+    \node[server, scale=10]{};
+    \node at (-2.5, 0.2){\color{blue!70!myblue}\huge #1};
+    \node at (-2.5, -1.2){\color{blue!70!myblue}\huge #2};
+  \end{tikzpicture}
+}
+
+\newcommand*{\serverhidden}[2] {
+  \begin{tikzpicture}
+    \node[serverhidden, scale=10]{};
+    \node at (-2.5, 0.2){\color{lightgray!10!gray}\huge #1};
+    \node at (-2.5, -1.2){\color{lightgray!10!gray}\huge #2};
+  \end{tikzpicture}
+}
+
+
+% The telephone icon
+\newcommand*{\phone}[2]{
+ \begin{tikzpicture}
+  \filldraw [fill=mymagenta, draw=black] (-3, 0) rectangle (3,2);
+  \node at (0,1.4){\color{red!20!black}\huge #1};% The name of the router
+  \node at (0,0.4){\color{red!20!black}\huge #2};% The IP address of the router
+ \end{tikzpicture}
+}
+
+\newcommand*{\phonehidden}[2]{
+ \begin{tikzpicture}
+  \filldraw [fill=lightgray, draw=gray] (-3, 0) rectangle (3,2);
+  \node at (0,1.4){\color{red!10!gray}\huge #1};% The name of the router
+  \node at (0,0.4){\color{red!10!gray}\huge #2};% The IP address of the router
+ \end{tikzpicture}
+}
