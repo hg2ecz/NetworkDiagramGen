@@ -10,7 +10,7 @@ import json
 import xlrd
 import codecs
 
-GENDIR="generate_out"
+GENDIR="generated_out"
 
 objtype_whitelist = ["net", "router", "switch", "server", "phone"]
 conn_whitelist = ["nincs", "serial", "eth", "mgmt", "vlan", "vpn", "bond"]
@@ -230,6 +230,7 @@ def xlsx_data_reader(xls_name, lapok):
                 data["views"].append(view)
 
             if mode == "objs":
+                print(row, s.cell(row, 4).value)
                 obj = {
                     "objtype" : s.cell(row, 0).value.strip(),
                     "objname" : s.cell(row, 1).value.strip(),
